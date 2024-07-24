@@ -1,35 +1,29 @@
 #!/usr/bin/env python3
-"""Last-In First-Out caching module.
+""" LIFOCache module
 """
-from collections import OrderedDict
 
-from base_caching import BaseCaching
-
+from base_caching import BaseCaching # type: ignore
 
 class LIFOCache(BaseCaching):
-    """Represents an object that allows storing and
-    retrieving items from a dictionary with a LIFO
-    removal mechanism when the limit is reached.
-    """
+    """ LIFOCache defines a caching system with a LIFO eviction policy """
+
     def __init__(self):
-        """Initializes the cache.
-        """
+        """ Initialize the cache """
         super().__init__()
-        self.cache_data = OrderedDict()
+        self.order = []  # To keep track of the order of keys
 
     def put(self, key, item):
-        """Adds an item in the cache.
-        """
-        if key is None or item is None:
-            return
-        if key not in self.cache_data:
-            if len(self.cache_data) + 1 > BaseCaching.MAX_ITEMS:
-                last_key, _ = self.cache_data.popitem(True)
-                print("DISCARD:", last_key)
-        self.cache_data[key] = item
-        self.cache_data.move_to_end(key, last=True)
+        """ Assign to the dictionary self.cache_data the item value for the key key """
+        if key is not None and item is not None:
+            if key in self.cache_data:
+                self.order.remove(key)
+            elif len(self.cache_data) >= BaseCaching.MAX_ITEMS:
+                last_key = self.order.pop()
+                del self.cache_data[last_key]
+                print("DISCARD: {}".format(last_key))
+            self.cache_data[key] = item
+            self.order.append(key)
 
     def get(self, key):
-        """Retrieves an item by key.
-        """
-        return self.cache_data.get(key, None
+        """ Return the value in self.cache_data linked to key """
+        return self.cache_data.get(key, None)
